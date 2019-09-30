@@ -14,8 +14,8 @@ syst_TP=zeros(Las,1);
 for i=1:Las
     [i Las]
     a=as(i);
-    eigsJ=zeros(30,1);
-    eigsH=zeros(30,1);
+    eigsJ=zeros(Lcs,1);
+    eigsH=zeros(Lcs,1);
     j=2;
     eigsJ([1:2])=[-1 -1];
     eigsH([1:2])=[-1 -1];
