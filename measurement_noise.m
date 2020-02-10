@@ -13,39 +13,62 @@ rng('default')
 
 % load('dataset_4D_rp-05_noise_20sims')
 load('dataset_4D_rp22_noise_20sims')
+
 Lcs=Lras;
 cs=ras;
 
-stepsnoise=15;
+stepsnoise=100;
 data_old=data;
-noises=linspace(0,1,stepsnoise);
+noises=linspace(0,0.5,stepsnoise);
 meanrhos=zeros(12,stepsnoise);
 stdrhos=zeros(12,stepsnoise);
 meanps=zeros(12,stepsnoise);
 stdps=zeros(12,stepsnoise);
 
-for k=1:stepsnoise;
-    
+pvalues=zeros(12,nr_sims,stepsnoise);
+rhos=zeros(12,nr_sims,stepsnoise);
+tic
+parfor k=1:stepsnoise;
+    k
     noise=noises(k);
     
-    data=data_old+normrnd(0,noise,size(data));
+    data=data_old+normrnd(0,noise,size(data_old));
 
-    pvalues=zeros(12,nr_sims);
-    rhos=zeros(12,nr_sims);
+
     for i=1:nr_sims
        ind=MEWS(data(:,:,:,i)); 
        for j=1:12
           [rho,pval]=corr(ind(j,:)',[1:Lcs]','Type','Kendall'); 
-          pvalues(j,i)=pval;
-          rhos(j,i)=abs(rho);
+          pvalues(j,i,k)=pval;
+          rhos(j,i,k)=abs(rho);
        end 
     end
     
-    meanrhos(:,k)=mean(rhos');
-    stdrhos(:,k)=std(rhos');
-    meanps(:,k)=mean(pvalues');
-    stdps(:,k)=std(pvalues');    
+%     meanrhos(:,k)=mean(rhos(:,:,k)');
+%     stdrhos(:,k)=std(rhos(:,:,k)');
+%     meanps(:,k)=mean(pvalues(:,:,k)');
+%     stdps(:,k)=std(pvalues(:,:,k)');    
 end
+toc
+
+for k=1:stepsnoise
+    meanrhos(:,k)=mean(rhos(:,:,k)');
+    stdrhos(:,k)=std(rhos(:,:,k)');
+    meanps(:,k)=mean(pvalues(:,:,k)');
+    stdps(:,k)=std(pvalues(:,:,k)');      
+end
+
+indnames={'av AC','node maxAC','av var','node maxvar','maxcov','explvar',...
+    'degfing','PCAvar','MAFeig','mafAC','MAFvar','absCC'};
+% figure
+% for i=1:12
+%     for j=1:20
+%         subplot(6,2,i)
+%         hold on
+%         plot(squeeze(pvalues(i,j,:)))    
+%         title(indnames(i))
+%     end
+% end
 
 bars=zeros(12,1);
 for i = 1:12
@@ -54,8 +77,7 @@ for i = 1:12
 end
 
 
-indnames={'av AC','node maxAC','av var','node maxvar','maxcov','explvar',...
-    'degfing','PCAvar','MAFeig','mafAC','MAFvar','absCC'}
+
 figure
 for i=1:12    
     subplot(6,2,i)
@@ -86,13 +108,13 @@ for i=1:12
     end
 end
 
-indnames={'av AC','node maxAC','av var','node maxvar','maxcov','explvar',...
-    'degfing','PCAvar','MAFeig','mafAC','MAFvar','absCC'}
+
 figure
 for i=1:12    
     subplot(6,2,i)
     plot(cs,ind(i,:)','LineWidth',1.5)
     title(indnames(i))
+    set ( gca, 'xdir', 'reverse' )
     if i>10
         xlabel('c')
     end
@@ -101,10 +123,11 @@ end
 figure
 bar(bars)
 set(gca,'xticklabel',indnames)
-% ticks=get(gca,'ytick');
-% set(gca,'yticklabel',string(noises(1:max(ticks)+1)))
 xtickangle(45)
 ylabel('noise where trend becomes insignificant')
+
+
+
 
 
 
