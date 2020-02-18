@@ -4,14 +4,14 @@
 
 function performance = eval_values(bars,high)
  
-    values = unique(bars)
-    performance = zeros(12,1)
+    values = unique(bars);
+    performance = zeros(12,1);
     for i = 1:length(values)
         if high == 1
-            idx = find(bars==values(end - (i-1)))
+            idx = find(bars==values(end - (i-1)));
         else
-            idx = find(bars==values(i))
+            idx = find(bars==values(i));
         end
-        performance(idx) = i        
+        performance(idx) = i ;       
     end
 end
